@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>ギャラリー</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+  <h1 class="text-2xl font-bold mb-6 text-center">ギャラリー</h1>
+  <div id="gallery" class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"></div>
+  <script>
+    // ★ GASのAPI公開URLを貼る
+    const API_URL = 'https://script.google.com/macros/s/AKfycbx-4uMWBvmNTAhBQwWnl5ZGNdafYSosAKMUXKcowWOpp6o3OTdC_L1AYfge_8gyRpmg/exec'
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(data => {
+        data.forEach(item => {
+          const thumb = `https://lh3.googleusercontent.com/d/${item.id}=w400`;
+          const full  = `https://lh3.googleusercontent.com/d/${item.id}=w1200`;
+          const card = document.createElement('div');
+          card.className = 'bg-white rounded-xl shadow-md overflow-hidden relative';
+          card.innerHTML = `
+            <div class="absolute top-2 left-2 bg-blue-600 text-white text-sm px-2 py-1 rounded-full">
+              No.${item.No}
+            </div>
+            <a href="${full}" target="_blank" title="大きな画像で開く">
+              <img src="${thumb}" alt="${item.title}" class="w-full h-48 object-cover hover:opacity-80 cursor-pointer">
+            </a>
+            <div class="p-4">
+              <h2 class="font-semibold text-lg mb-1">${item.title}</h2>
+              <p class="text-gray-600 text-sm">${item.comment}</p>
+            </div>
+          `;
+          document.getElementById('gallery').appendChild(card);
+        });
+      });
+  </script>
+</body>
+</html>
