@@ -10,20 +10,15 @@
   <h1 class="text-2xl font-bold mb-6 text-center">ギャラリー</h1>
   <div id="gallery" class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"></div>
   <script>
-    // --- ここを書き換える！ ---
-    // JSON APIのURLを指定
     const apiUrl = "https://script.google.com/macros/s/AKfycbx-4uMWBvmNTAhBQwWnl5ZGNdafYSosAKMUXKcowWOpp6o3OTdC_L1AYfge_8gyRpmg/exec";
-    // -------------------------
-
     fetch(apiUrl)
       .then(res => res.json())
       .then(data => {
         const gallery = document.getElementById('gallery');
+        const frag = document.createDocumentFragment();
         data.forEach(item => {
-          // スプレッドシートの "num", "id", "title", "comment" カラムを使う前提
-          const thumb = `https://lh3.googleusercontent.com/d/${item.id}=w400`;
-          const popup = `https://lh3.googleusercontent.com/d/${item.id}=w800`;
-
+          const thumb = `https://lh3.googleusercontent.com/d/${item.id}=w400-h300-p-k-no-nu`;
+          const popup = `https://lh3.googleusercontent.com/d/${item.id}=w800-h600-p-k-no-nu`;
           const card = document.createElement('div');
           card.className = 'bg-white rounded-xl shadow-md overflow-hidden relative';
           card.innerHTML = `
@@ -31,15 +26,16 @@
               No.${item.num}
             </div>
             <a href="${popup}" target="_blank" rel="noopener">
-              <img src="${thumb}" alt="${item.title}" class="w-full h-48 object-cover" style="cursor:pointer;">
+              <img src="${thumb}" alt="${item.title}" class="w-full h-48 object-cover" style="cursor:pointer;" loading="lazy">
             </a>
             <div class="p-4">
               <h2 class="font-semibold text-lg mb-1">${item.title || ""}</h2>
               <p class="text-gray-600 text-sm">${item.comment || ""}</p>
             </div>
           `;
-          gallery.appendChild(card);
+          frag.appendChild(card);
         });
+        gallery.appendChild(frag);
       });
   </script>
 </body>
