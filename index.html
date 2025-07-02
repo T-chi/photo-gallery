@@ -1,42 +1,129 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>ギャラリー</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 p-6">
-  <h1 class="text-2xl font-bold mb-6 text-center">牟岐町×美波町フォトコンテスト２０２５  【美波町応募作品】</h1>
-  <div id="gallery" class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"></div>
-  <script>
-    const apiUrl = "https://script.google.com/macros/s/AKfycbx-4uMWBvmNTAhBQwWnl5ZGNdafYSosAKMUXKcowWOpp6o3OTdC_L1AYfge_8gyRpmg/exec";
-    fetch(apiUrl)
-      .then(res => res.json())
-      .then(data => {
-        const gallery = document.getElementById('gallery');
-        const frag = document.createDocumentFragment();
-        data.forEach(item => {
-          const thumb = `https://lh3.googleusercontent.com/d/${item.id}=w400-h300-p-k-no-nu`;
-          const popup = `https://lh3.googleusercontent.com/d/${item.id}=w800-h600-p-k-no-nu`;
-          const card = document.createElement('div');
-          card.className = 'bg-white rounded-xl shadow-md overflow-hidden relative';
-          card.innerHTML = `
-            <div class="absolute top-2 left-2 bg-blue-600 text-white text-sm px-2 py-1 rounded-full">
-              No.${item.num}
-            </div>
-            <a href="${popup}" target="_blank" rel="noopener">
-              <img src="${thumb}" alt="${item.title}" class="w-full h-48 object-cover" style="cursor:pointer;" loading="lazy">
-            </a>
-            <div class="p-4">
-              <h2 class="font-semibold text-lg mb-1">${item.title || ""}</h2>
-              <p class="text-gray-600 text-sm">${item.comment || ""}</p>
-            </div>
-          `;
-          frag.appendChild(card);
-        });
-        gallery.appendChild(frag);
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<h1 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem; text-align: center;">
+  牟岐町×美波町フォトコンテスト２０２５【美波町応募作品】
+</h1>
+
+<style>
+  .gallery-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+  }
+  .gallery-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* タイトル・コメントを写真の直下に揃える */
+  }
+  /* サムネイルは従来通り cover */
+  .gallery-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    cursor: pointer;
+  }
+  .gallery-num {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: #2563eb;
+    color: white;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 12px;
+  }
+  .gallery-text {
+    padding: 12px;
+  }
+  .gallery-title {
+    font-weight: bold;
+    margin-bottom: 4px;
+    font-size: 1rem;
+  }
+  .gallery-comment {
+    color: #666;
+    font-size: 0.85rem;
+  }
+
+  /* モーダル用スタイル */
+  .modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  .modal img {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+  }
+</style>
+
+<div id="gallery" class="gallery-container"></div>
+
+<!-- モーダル要素をページ末尾に追加 -->
+<div id="modal" class="modal">
+  <img id="modal-img" src="" alt="拡大画像">
+</div>
+
+<script>
+  const apiUrl = "https://script.google.com/macros/s/AKfycbx-4uMWBvmNTAhBQwWnl5ZGNdafYSosAKMUXKcowWOpp6o3OTdC_L1AYfge_8gyRpmg/exec";
+  const modal = document.getElementById('modal');
+  const modalImg = document.getElementById('modal-img');
+
+  fetch(apiUrl)
+    .then(res => res.json())
+    .then(data => {
+      const gallery = document.getElementById('gallery');
+      const frag = document.createDocumentFragment();
+
+      data.forEach(item => {
+        const thumb = `https://lh3.googleusercontent.com/d/${item.id}=w400-h300-p-k-no-nu`;
+        const popup = `https://lh3.googleusercontent.com/d/${item.id}=w800`;
+
+        const card = document.createElement('div');
+        card.className = 'gallery-card';
+        card.innerHTML = `
+          <div class="gallery-num">No.${item.num}</div>
+          <img src="${thumb}" alt="${item.title || ''}" data-popup="${popup}">
+          <div class="gallery-text">
+            <div class="gallery-title">${item.title || ''}</div>
+            <div class="gallery-comment">${item.comment || ''}</div>
+          </div>
+        `;
+        frag.appendChild(card);
       });
-  </script>
-</body>
-</html>
+
+      gallery.appendChild(frag);
+
+      // クリックでモーダル表示
+      gallery.querySelectorAll('img[data-popup]').forEach(img => {
+        img.addEventListener('click', e => {
+          modalImg.src = e.currentTarget.dataset.popup;
+          modal.style.display = 'flex';
+        });
+      });
+    })
+    .catch(err => {
+      document.getElementById('gallery').innerText = '画像の読み込みに失敗しました。';
+      console.error(err);
+    });
+
+  // モーダルをクリックしたら閉じる
+  modal.addEventListener('click', () => {
+    modal.style.display = 'none';
+    modalImg.src = '';
+  });
+</script>
